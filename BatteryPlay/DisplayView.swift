@@ -60,7 +60,7 @@ class DisplayView: UIView {
             var topLabel = UILabel(frame: rectangle2)
             
             topLabel.textAlignment = .center
-        topLabel.backgroundColor = colorWithHexString(hexString: "#E0E0E0")
+            topLabel.backgroundColor = colorWithHexString(hexString: "#E0E0E0")
             topLabel.font = UIFont.boldSystemFont(ofSize: 40.0)
             topLabel.text = "Voltage"
             self.addSubview(topLabel)

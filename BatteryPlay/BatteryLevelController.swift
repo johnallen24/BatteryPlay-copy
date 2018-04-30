@@ -1,20 +1,16 @@
-//
-//  ViewController.swift
-//  BatteryPlay
-//
+
 //  Created by John Allen on 1/20/18.
 //  Copyright © 2018 jallen.studios. All rights reserved.
-//
+
+// Controls the initial window
 
 import UIKit
 import Charts
-import MultipeerConnectivity
 import CoreBluetooth
 
-class BatteryLevelController: UIViewController, MCSessionDelegate, MCBrowserViewControllerDelegate, CBCentralManagerDelegate, CBPeripheralDelegate, CBPeripheralManagerDelegate {
+class BatteryLevelController: UIViewController, CBCentralManagerDelegate, CBPeripheralDelegate, CBPeripheralManagerDelegate {
     
-    
-    
+
     var totalValues = 0.0
     
     func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
@@ -111,9 +107,6 @@ func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CB
     var sensorTagPeripheral : CBPeripheral?
     
     
-    var peerID: MCPeerID!
-    var mcSession: MCSession!
-    var mcAdvertiserAssistant: MCAdvertiserAssistant!
 
     @IBOutlet weak var txtTextbox: UITextField!
 
@@ -208,10 +201,7 @@ func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CB
         //let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.dismissKeyboard (_:)))
        // self.view.addGestureRecognizer(tapGesture)
         // Do any additional setup after loading the view, typically from a nib.
-        timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(runTimedCode), userInfo: nil, repeats: true)
-        peerID = MCPeerID(displayName: UIDevice.current.name)
-        mcSession = MCSession(peer: peerID, securityIdentity: nil, encryptionPreference: .required)
-        mcSession.delegate = self
+        
         chtChart.noDataTextColor = UIColor.black
         chtChart.noDataText = "Connect to sensor"
         chtChart.backgroundColor = colorWithHexString(hexString: "#FAF7F3")
@@ -368,35 +358,6 @@ func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CB
         }
     }
     
-    
-    
-    
-    // notification function for Timer - called every 1 second
-    @objc func runTimedCode() {
-        if mcSession.connectedPeers.count > 0 {
-        currentTime = currentTime + 1.0
-        let currentTimeString = String(currentTime) //create string to send via data
-        let currentBatteryLevel = String(batteryLevel * 100.0)
-        sendData(currentTimeString, currentBatteryLevel)
-    }
-    }
-
-    func sendData(_ currentTime: String, _ currentBatteryLevel: String) {
-        if mcSession.connectedPeers.count > 0 {
-            let dataDictionary : [String:String] =
-                ["time": currentTime,
-                 "batteryLevel": currentBatteryLevel]
-            let graphData: Data = NSKeyedArchiver.archivedData(withRootObject: dataDictionary)
-
-            do {
-                try mcSession.send(graphData, toPeers: mcSession.connectedPeers, with: .reliable)
-            } catch let error as NSError {
-                let ac = UIAlertController(title: "Send error", message: error.localizedDescription, preferredStyle: .alert)
-                ac.addAction(UIAlertAction(title: "OK", style: .default))
-                present(ac, animated: true)
-            }
-        }
-    }
 
     func updateGraph(){
         
@@ -458,94 +419,7 @@ func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CB
     
     var totalXmoved = 0.0
 
-    //@objc func dismissKeyboard (_ sender: UITapGestureRecognizer) {
-   //     txtTextbox.resignFirstResponder()
-   // }
 
-//    @IBAction func showConnectivity(_ sender: UIButton) {
-//        let actionSheet = UIAlertController(title: "Battery Level Exchange" , message: "Do you want to host or join a session?", preferredStyle: .actionSheet)
-//
-//        actionSheet.addAction(UIAlertAction(title: "Host Session", style: .default, handler: {(action:UIAlertAction) in self.startHosting()}))
-//
-//        actionSheet.addAction(UIAlertAction(title: "Join Session", style: .default, handler: {(action:UIAlertAction) in self.joinSession()}))
-//
-//        actionSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-//
-//        if let popoverController = actionSheet.popoverPresentationController {
-//
-//            popoverController.sourceView = self.view
-//            popoverController.sourceRect = CGRect(x: self.view.bounds.midX, y: self.view.bounds.midY, width: 0, height: 0)
-//            popoverController.permittedArrowDirections = []
-//        }
-//        self.present(actionSheet, animated: true, completion: nil)
-//    }
-
-    func startHosting() {
-        mcAdvertiserAssistant = MCAdvertiserAssistant(serviceType: "hws-kb", discoveryInfo: nil, session: mcSession)
-        mcAdvertiserAssistant.start()
-    }
-
-    func joinSession() {
-        let mcBrowser = MCBrowserViewController(serviceType: "hws-kb", session: mcSession)
-        mcBrowser.delegate = self
-        present(mcBrowser, animated: true)
-    }
-
-
-    func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
-        switch state {
-        case MCSessionState.connected:
-            print("Connected: \(peerID.displayName)")
-
-        case MCSessionState.connecting:
-            print("Connecting: \(peerID.displayName)")
-
-        case MCSessionState.notConnected:
-            print("Not Connected: \(peerID.displayName)")
-        }
-    }
-
-    func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
-
-        let dataDictionary = NSKeyedUnarchiver.unarchiveObject(with: data) as! [String : String]
-        if let newTimeString = dataDictionary["time"] {
-            if let newBatteryLevelString = dataDictionary["batteryLevel"] {
-                DispatchQueue.main.async { [unowned self] in
-                    
-                    
-                    self.stimes.append(newTimeString)
-                    let newTimeDouble = Double(newTimeString)!
-                    let newBatteryLevelDouble = Double(newBatteryLevelString)!
-                    self.times.append(newTimeDouble)
-                    self.batteryLevels.append(newBatteryLevelDouble)
-                    self.updateGraph()
-                }
-
-            }
-        }
-    }
-
-
-    func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {
-
-    }
-
-    func session(_ session: MCSession, didStartReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, with progress: Progress) {
-
-    }
-
-    func session(_ session: MCSession, didFinishReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, at localURL: URL?, withError error: Error?) {
-
-    }
-
-    func browserViewControllerDidFinish(_ browserViewController: MCBrowserViewController) {
-        dismiss(animated: true, completion: nil)
-    }
-
-    func browserViewControllerWasCancelled(_ browserViewController: MCBrowserViewController) {
-        dismiss(animated: true, completion: nil)
-    }
-    
     func colorWithHexString(hexString: String, alpha:CGFloat? = 1.0) -> UIColor {
         
         // Convert hex string to an integer
@@ -571,19 +445,12 @@ func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CB
         return hexInt
     }
     
-    
-    
-    
-
-
 }
-
 
 public class ChartFormatter: NSObject, IAxisValueFormatter {
     
     
-    
-    var stimes = [String]()
+var stimes = [String]()
     
  public func stringForValue(_ value: Double, axis: AxisBase?) -> String {
        return stimes[Int(value)]
