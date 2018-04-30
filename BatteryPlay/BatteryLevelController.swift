@@ -10,9 +10,11 @@ import CoreBluetooth
 
 class BatteryLevelController: UIViewController, CBCentralManagerDelegate, CBPeripheralDelegate, CBPeripheralManagerDelegate {
     
+    //MARK: Bluetooth Connection
+    
     var centralManager: CBCentralManager!
     var peripheralManager: CBPeripheralManager!
-    var sensorTagPeripheral : CBPeripheral?
+    var LoPyPeripheral : CBPeripheral?
     
     
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
@@ -36,11 +38,11 @@ class BatteryLevelController: UIViewController, CBCentralManagerDelegate, CBPeri
         if (nameOfDeviceFound == deviceName) {
             print("SensorTag found")
             // Stop scanning
-            sensorTagPeripheral = peripheral
+            LoPyPeripheral = peripheral
             self.centralManager.stopScan()
             // Set as the peripheral to use and establish connection
             
-            self.sensorTagPeripheral?.delegate = (self as CBPeripheralDelegate)
+            self.LoPyPeripheral?.delegate = (self as CBPeripheralDelegate)
             print("hey")
         }
         else {
@@ -65,7 +67,7 @@ class BatteryLevelController: UIViewController, CBCentralManagerDelegate, CBPeri
             isConnected = false
         }
         
-        sensorTagPeripheral = nil
+        LoPyPeripheral = nil
         centralManagerDidUpdateState(centralManager)
         
     }
@@ -120,7 +122,7 @@ class BatteryLevelController: UIViewController, CBCentralManagerDelegate, CBPeri
             totalValues += 1
             let doubleValue = Double(stringValue)!.rounded(toPlaces: 2)
             self.times.append(totalValues)
-            self.batteryLevels.append(doubleValue)
+            self.sensorValues.append(doubleValue)
             
             
             self.updateGraph()
@@ -128,16 +130,18 @@ class BatteryLevelController: UIViewController, CBCentralManagerDelegate, CBPeri
         }
     }
     
-    
     func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
         
     }
     
+    //* App does not actually disconnect when disconnect button is pressed. Only stops graphing*//
     
-    private var isConnected = false
+    
+    private var isConnected = false // determines whether app is currently plotting the data
     
     @objc func connect(_ sender: UIButton) {
         
+        // check to see if app is already connected
         if(connectButton.titleLabel?.text == "Disconnect")
         {
             isConnected = false
@@ -145,7 +149,8 @@ class BatteryLevelController: UIViewController, CBCentralManagerDelegate, CBPeri
         }
         else
         {
-            if let peripheral = sensorTagPeripheral
+            // if LoPyPeripheral is not nil, the app has found the LoPy and can connect
+            if let peripheral = LoPyPeripheral
             {
                 changeToDisconnectButton()
                 self.centralManager.connect(peripheral)
@@ -164,8 +169,6 @@ class BatteryLevelController: UIViewController, CBCentralManagerDelegate, CBPeri
         
     }
     
-    
-    
     @objc func graphTapped() {
         print("touch touch")
         self.performSegue(withIdentifier: "toDataChart", sender: nil)
@@ -173,16 +176,19 @@ class BatteryLevelController: UIViewController, CBCentralManagerDelegate, CBPeri
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         let dataChartController = segue.destination as! dataChartController
-        dataChartController.batteryLevels = self.batteryLevels
+        dataChartController.batteryLevels = self.sensorValues
         dataChartController.times = self.times
     }
     
     
-    var batteryLevels : [Double] = []
-    var times: [Double] = []
     
     
-    let displayView: DisplayView = {
+    
+    var times: [Double] = [] //holds time at every sensor value
+    var sensorValues : [Double] = [] //holds all values from LoPy
+   
+
+    let portraitDisplayView: DisplayView = {
         let display = DisplayView()
         display.translatesAutoresizingMaskIntoConstraints = false
         return display
@@ -236,7 +242,9 @@ class BatteryLevelController: UIViewController, CBCentralManagerDelegate, CBPeri
     override func viewDidLoad() {
         super.viewDidLoad()
         centralManager = CBCentralManager(delegate: self, queue: nil)
+        //******Graph Background Color******//
         chtChart.backgroundColor = colorWithHexString(hexString: "#FAF7F3")
+        //*********************************//
         NotificationCenter.default.addObserver(self, selector: #selector(deviceRotated), name: NSNotification.Name.UIDeviceOrientationDidChange, object: nil)
         view.addSubview(chtChart)
         setupPortraitLayout()
@@ -248,10 +256,7 @@ class BatteryLevelController: UIViewController, CBCentralManagerDelegate, CBPeri
         if UIDeviceOrientationIsPortrait(UIDevice.current.orientation){
             setupPortraitLayout()
         }
-        
-        
     }
-    
     
     // when device is rotated, setup proper view layout
     @objc func deviceRotated() {
@@ -268,15 +273,14 @@ class BatteryLevelController: UIViewController, CBCentralManagerDelegate, CBPeri
         
         landscapeDisplayView.removeFromSuperview()
         connectButton.removeFromSuperview()
-        view.addSubview(displayView)
+        view.addSubview(portraitDisplayView)
         view.addSubview(connectButton)
         
         
-        displayView.topAnchor.constraint(equalTo: view.topAnchor, constant: 0).isActive = true
-        displayView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0).isActive = true
-        displayView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0).isActive = true
-        displayView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.5).isActive = true
-        displayView.backgroundColor = colorWithHexString(hexString: "E0E0E0")
+        portraitDisplayView.topAnchor.constraint(equalTo: view.topAnchor, constant: 0).isActive = true
+        portraitDisplayView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0).isActive = true
+        portraitDisplayView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0).isActive = true
+        portraitDisplayView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.5).isActive = true
         
         connectButton.topAnchor.constraint(equalTo: view.topAnchor, constant: 24).isActive = true
         connectButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 12).isActive = true
@@ -289,25 +293,20 @@ class BatteryLevelController: UIViewController, CBCentralManagerDelegate, CBPeri
         connectButton.addTarget(self, action: #selector(BatteryLevelController.connect(_:)), for: UIControlEvents.touchUpInside)
         
         chtChart.translatesAutoresizingMaskIntoConstraints = false
-        chtChart.topAnchor.constraint(equalTo: displayView.bottomAnchor, constant: 0).isActive = true
+        chtChart.topAnchor.constraint(equalTo: portraitDisplayView.bottomAnchor, constant: 0).isActive = true
         chtChart.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0).isActive = true
         chtChart.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0).isActive = true
         chtChart.bottomAnchor.constraint(equalTo: bottomLayoutGuide.topAnchor, constant: 0).isActive = true
         let touchDown = UITapGestureRecognizer(target: self, action: #selector(graphTapped))
         chtChart.addGestureRecognizer(touchDown)
-        
-        
+    
     }
     
     
-    
-    
     private func setupLandscapeFormat() {
-        displayView.removeFromSuperview()
+        portraitDisplayView.removeFromSuperview()
         connectButton.removeFromSuperview()
         view.addSubview(landscapeDisplayView)
-        
-        
         
         
         landscapeDisplayView.topAnchor.constraint(equalTo: view.topAnchor, constant: 0).isActive = true
@@ -325,7 +324,6 @@ class BatteryLevelController: UIViewController, CBCentralManagerDelegate, CBPeri
         
         descriptionTextView.leadingAnchor.constraint(equalTo: landscapeDisplayView.leadingAnchor, constant: 0).isActive = true
         descriptionTextView.trailingAnchor.constraint(equalTo: landscapeDisplayView.trailingAnchor, constant: 0).isActive = true
-        descriptionTextView.backgroundColor = colorWithHexString(hexString: "E0E0E0")
         
         landscapeDisplayView.addSubview(connectButton)
         connectButton.topAnchor.constraint(equalTo: view.topAnchor, constant: 16).isActive = true
@@ -344,30 +342,18 @@ class BatteryLevelController: UIViewController, CBCentralManagerDelegate, CBPeri
         chtChart.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0).isActive = true
         chtChart.bottomAnchor.constraint(equalTo: bottomLayoutGuide.topAnchor, constant: 0).isActive = true
         
-        
-        //connect button, new display view
-        //uitextfield
-        
-        
-        
-        
     }
-    
-    private var hasConnectedBefore = false
-    
-    
-    
     
     func updateGraph(){
         
-        displayView.label.text = "\(batteryLevels[batteryLevels.count - 1])"
-        descriptionTextView.text = "Current Voltage: \(batteryLevels[batteryLevels.count - 1])"
+        portraitDisplayView.label.text = "\(sensorValues[sensorValues.count - 1])"
+        descriptionTextView.text = "Current Voltage: \(sensorValues[sensorValues.count - 1])"
         
         var lineChartEntry  = [ChartDataEntry]()
         
         for i in 0..<times.count {
             
-            let value = ChartDataEntry(x: times[i], y: batteryLevels[i])
+            let value = ChartDataEntry(x: times[i], y: sensorValues[i])
             
             lineChartEntry.append(value)
         }
@@ -406,15 +392,12 @@ class BatteryLevelController: UIViewController, CBCentralManagerDelegate, CBPeri
             
             totalXmoved += 1.0
         }
-        
-        
-        
     }
     
-    var totalXmoved = 0.0
+    private var totalXmoved = 0.0
     
     
-    func colorWithHexString(hexString: String, alpha:CGFloat? = 1.0) -> UIColor {
+     func colorWithHexString(hexString: String, alpha:CGFloat? = 1.0) -> UIColor {
         
         // Convert hex string to an integer
         let hexint = Int(self.intFromHexString(hexStr: hexString))

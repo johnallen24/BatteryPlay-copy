@@ -13,12 +13,15 @@ class DisplayView: UIView {
     
     var scale1: CGFloat = 0.6
     var scale2 : CGFloat = 0.48
-    
+
     var label: UILabel = UILabel()
     
     override func draw(_ rect: CGRect) {
-            
-            
+        
+       colorWithHexString(hexString: "E0E0E0").setFill()
+        UIRectFill(rect)
+        
+        
             let centerpoint = CGPoint(x: bounds.midX, y: bounds.midY + 50)
             
             
@@ -65,6 +68,8 @@ class DisplayView: UIView {
             topLabel.text = "Voltage"
             self.addSubview(topLabel)
         
+        
+    
     }
     
     func colorWithHexString(hexString: String, alpha:CGFloat? = 1.0) -> UIColor {
