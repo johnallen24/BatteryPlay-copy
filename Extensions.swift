@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreBluetooth
 
 extension Double {
     /// Rounds the double to decimal places value
@@ -15,3 +16,6 @@ extension Double {
         return (self * divisor).rounded() / divisor
     }
 }
+
+
+
