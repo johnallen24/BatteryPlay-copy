@@ -11,6 +11,7 @@
 		AB0A905C202CBFAE001EE20E /* dataChartController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0A905B202CBFAE001EE20E /* dataChartController.swift */; };
 		AB0A905E202CC9C3001EE20E /* dataCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0A905D202CC9C3001EE20E /* dataCell.swift */; };
 		AB0A9064202CFA72001EE20E /* datacell2.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0A9063202CFA72001EE20E /* datacell2.swift */; };
+		AB0C19832096C01F00956FDD /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0C19822096C01F00956FDD /* Extensions.swift */; };
 		AB0D32F3203635910083CFF7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AB0D32F2203635910083CFF7 /* Main.storyboard */; };
 		AB7BEA0B2024DE1C00BC27FA /* DisplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB7BEA0A2024DE1C00BC27FA /* DisplayView.swift */; };
 		ABAF34212013D97C00663D54 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABAF34202013D97C00663D54 /* AppDelegate.swift */; };
@@ -45,6 +46,7 @@
 		AB0A905B202CBFAE001EE20E /* dataChartController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = dataChartController.swift; sourceTree = "<group>"; };
 		AB0A905D202CC9C3001EE20E /* dataCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = dataCell.swift; sourceTree = "<group>"; };
 		AB0A9063202CFA72001EE20E /* datacell2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = datacell2.swift; sourceTree = "<group>"; };
+		AB0C19822096C01F00956FDD /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		AB0D32F2203635910083CFF7 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		AB7BEA0A2024DE1C00BC27FA /* DisplayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayView.swift; sourceTree = "<group>"; };
 		ABAF341D2013D97C00663D54 /* BatteryPlay.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BatteryPlay.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -98,9 +100,18 @@
 			name = Pods;
 			sourceTree = "<group>";
 		};
+		AB0C19812096C00300956FDD /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				AB0C19822096C01F00956FDD /* Extensions.swift */,
+			);
+			name = Extensions;
+			sourceTree = "<group>";
+		};
 		ABAF34142013D97C00663D54 = {
 			isa = PBXGroup;
 			children = (
+				AB0C19812096C00300956FDD /* Extensions */,
 				ABAF341F2013D97C00663D54 /* BatteryPlay */,
 				ABAF34342013D97C00663D54 /* BatteryPlayTests */,
 				ABAF343F2013D97C00663D54 /* BatteryPlayUITests */,
@@ -358,6 +369,7 @@
 				ABAF34232013D97C00663D54 /* BatteryLevelController.swift in Sources */,
 				AB0A905E202CC9C3001EE20E /* dataCell.swift in Sources */,
 				AB7BEA0B2024DE1C00BC27FA /* DisplayView.swift in Sources */,
+				AB0C19832096C01F00956FDD /* Extensions.swift in Sources */,
 				AB0A905C202CBFAE001EE20E /* dataChartController.swift in Sources */,
 				ABE9CFF0201FBF9100033973 /* EnergyController.swift in Sources */,
 				ABAF34212013D97C00663D54 /* AppDelegate.swift in Sources */,

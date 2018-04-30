@@ -10,13 +10,10 @@ import CoreBluetooth
 
 class BatteryLevelController: UIViewController, CBCentralManagerDelegate, CBPeripheralDelegate, CBPeripheralManagerDelegate {
     
-
-    var totalValues = 0.0
     
-    func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
-        
-    }
-    
+    var centralManager: CBCentralManager!
+    var peripheralManager: CBPeripheralManager!
+    var sensorTagPeripheral : CBPeripheral?
     
     
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
@@ -38,7 +35,7 @@ class BatteryLevelController: UIViewController, CBCentralManagerDelegate, CBPeri
         let nameOfDeviceFound = (advertisementData as NSDictionary).object(forKey: CBAdvertisementDataLocalNameKey) as? String
         
         if (nameOfDeviceFound == deviceName) {
-           print("SensorTag found")
+            print("SensorTag found")
             // Stop scanning
             sensorTagPeripheral = peripheral
             self.centralManager.stopScan()
@@ -68,48 +65,43 @@ class BatteryLevelController: UIViewController, CBCentralManagerDelegate, CBPeri
             }
         }
     }
-
-    func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
-       
-        print("Getting Voltages")
     
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
         
+        print("Getting Voltages")
         for charateristic in service.characteristics! {
-        
+            
             let thisCharacteristic = charateristic as CBCharacteristic
             if (thisCharacteristic.uuid == CBUUID(string: "36353433-3231-3039-3837-363534336261"))
             {
                 peripheral.setNotifyValue(true, for: thisCharacteristic)
             }
         }
-        }
-
-func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
-    
-    
-    if let stringValue = String(data: Data(characteristic.value!), encoding: .utf8)
-    {
-        totalValues += 1
-        self.stimes.append(stringValue)
-        let doubleValue = Double(stringValue)!.rounded(toPlaces: 2)
-        self.times.append(totalValues)
-        self.batteryLevels.append(doubleValue)
-    
-     
-        self.updateGraph()
     }
-}
-
-   
-
-    var centralManager: CBCentralManager!
-    var peripheralManager: CBPeripheralManager!
-    var sensorTagPeripheral : CBPeripheral?
+    
+    private var totalValues = 0.0
+    
+    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
+        
+        
+        if let stringValue = String(data: Data(characteristic.value!), encoding: .utf8)
+        {
+            totalValues += 1
+            self.stimes.append(stringValue)
+            let doubleValue = Double(stringValue)!.rounded(toPlaces: 2)
+            self.times.append(totalValues)
+            self.batteryLevels.append(doubleValue)
+            
+            
+            self.updateGraph()
+        }
+    }
     
     
-
-    @IBOutlet weak var txtTextbox: UITextField!
-
+    func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
+        
+    }
+    
     
     @objc func graphTapped() {
         print("touch touch")
@@ -117,19 +109,9 @@ func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CB
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        var dataChartController = segue.destination as! dataChartController
+        let dataChartController = segue.destination as! dataChartController
         dataChartController.batteryLevels = self.batteryLevels
         dataChartController.times = self.times
-    }
-    
-    
-    
-    @IBOutlet var displayLabel: UILabel!
-
-    var timer: Timer!
-
-    var batteryLevel: Float {
-        return UIDevice.current.batteryLevel
     }
 
     var numbers : [Double] = []
@@ -158,9 +140,6 @@ func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CB
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
-    
-    
-    
     
     let descriptionTextView: UITextView = {
         let textView = UITextView()
@@ -195,13 +174,6 @@ func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CB
     override func viewDidLoad() {
         super.viewDidLoad()
         centralManager = CBCentralManager(delegate: self, queue: nil)
-        print("load 1")
-        UIDevice.current.isBatteryMonitoringEnabled = true
-        print("battery level is \(batteryLevel)")
-        //let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.dismissKeyboard (_:)))
-       // self.view.addGestureRecognizer(tapGesture)
-        // Do any additional setup after loading the view, typically from a nib.
-        
         chtChart.noDataTextColor = UIColor.black
         chtChart.noDataText = "Connect to sensor"
         chtChart.backgroundColor = colorWithHexString(hexString: "#FAF7F3")
@@ -317,14 +289,7 @@ func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CB
         
         
     }
-    
-    
-    
-    
-    
-    
-    
-    
+
     
    @objc func connect(_ sender: UIButton) {
     
@@ -461,11 +426,5 @@ var stimes = [String]()
     }
 }
 
-extension Double {
-    /// Rounds the double to decimal places value
-    func rounded(toPlaces places:Int) -> Double {
-        let divisor = pow(10.0, Double(places))
-        return (self * divisor).rounded() / divisor
-    }
-}
+
 
