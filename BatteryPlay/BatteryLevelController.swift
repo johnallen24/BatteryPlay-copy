@@ -50,8 +50,40 @@ class BatteryLevelController: UIViewController, CBCentralManagerDelegate, CBPeri
     
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         print("Connected")
+        isConnected = true
         peripheral.discoverServices(nil)
     }
+    
+    func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
+        
+        if isConnected {
+            let alertController = UIAlertController(title: "LoPy has Disconnected", message:
+                "Make sure LoPy is turned on and running", preferredStyle: UIAlertControllerStyle.alert)
+            alertController.addAction(UIAlertAction(title: "Dismiss", style: UIAlertActionStyle.default,handler: nil))
+            self.present(alertController, animated: true, completion: nil)
+            changeToConnectButton()
+            isConnected = false
+        }
+        
+        sensorTagPeripheral = nil
+        centralManagerDidUpdateState(centralManager)
+        
+    }
+    
+    
+    func changeToConnectButton() {
+        connectButton.sizeToFit()
+        connectButton.setTitle("Connect", for: .normal)
+        connectButton.setTitleColor(UIColor.blue, for: .normal)
+    }
+    
+    func changeToDisconnectButton() {
+        connectButton.setTitle("Disconnect", for: .normal)
+        connectButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 15)
+        connectButton.setTitleColor(UIColor.red, for: .normal)
+        
+    }
+    
     
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         
@@ -82,7 +114,7 @@ class BatteryLevelController: UIViewController, CBCentralManagerDelegate, CBPeri
     
     func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
         
-        
+        if isConnected {
         if let stringValue = String(data: Data(characteristic.value!), encoding: .utf8)
         {
             totalValues += 1
@@ -93,12 +125,45 @@ class BatteryLevelController: UIViewController, CBCentralManagerDelegate, CBPeri
             
             self.updateGraph()
         }
+        }
     }
     
     
     func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
         
     }
+    
+    
+    private var isConnected = false
+    
+    @objc func connect(_ sender: UIButton) {
+        
+        if(connectButton.titleLabel?.text == "Disconnect")
+        {
+            isConnected = false
+            changeToConnectButton()
+        }
+        else
+        {
+            if let peripheral = sensorTagPeripheral
+            {
+                changeToDisconnectButton()
+                self.centralManager.connect(peripheral)
+                
+            }
+            else
+            {
+                let alertController = UIAlertController(title: "Cannot Connect", message:
+                    "Make sure LoPy is turned on and running", preferredStyle: UIAlertControllerStyle.alert)
+                alertController.addAction(UIAlertAction(title: "Dismiss", style: UIAlertActionStyle.default,handler: nil))
+                self.present(alertController, animated: true, completion: nil)
+            }
+        }
+        
+        
+        
+    }
+    
     
     
     @objc func graphTapped() {
@@ -291,59 +356,6 @@ class BatteryLevelController: UIViewController, CBCentralManagerDelegate, CBPeri
     private var hasConnectedBefore = false
     
     
-    @objc func connect(_ sender: UIButton) {
-        
-        if(connectButton.titleLabel?.text == "Disconnect")
-        {
-            self.centralManager.cancelPeripheralConnection(self.sensorTagPeripheral!)
-            //connectButton.widthAnchor.constraint(equalToConstant: 65).isActive = true
-            connectButton.sizeToFit()
-            connectButton.setTitle("Connect", for: .normal)
-            connectButton.setTitleColor(UIColor.blue, for: .normal)
-        }
-        else
-        {
-            centralManager.scanForPeripherals(withServices: nil, options: nil)
-            
-            
-            if !hasConnectedBefore {
-                if let peripheral = sensorTagPeripheral
-                {
-                    connectButton.setTitle("Disconnect", for: .normal)
-                    connectButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 15)
-                    connectButton.setTitleColor(UIColor.red, for: .normal)
-                    self.centralManager.connect(peripheral)
-                    hasConnectedBefore = true
-                }
-                else
-                {
-                    let alertController = UIAlertController(title: "Cannot Connect", message:
-                        "Make sure LoPy is turned on and running", preferredStyle: UIAlertControllerStyle.alert)
-                    alertController.addAction(UIAlertAction(title: "Dismiss", style: UIAlertActionStyle.default,handler: nil))
-                    self.present(alertController, animated: true, completion: nil)
-                }
-            }
-                
-            else {
-                if sensorTagPeripheral!.state == CBPeripheralState.connected {
-                    NSLog("StillAlive :: Passed")
-                    connectButton.setTitle("Disconnect", for: .normal)
-                    connectButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 15)
-                    connectButton.setTitleColor(UIColor.red, for: .normal)
-                    self.centralManager.connect(sensorTagPeripheral!)
-                } else {
-                    NSLog("StillAlive :: Failed")
-                    let alertController = UIAlertController(title: "Cannot Connect", message:
-                        "Make sure LoPy is turned on and running", preferredStyle: UIAlertControllerStyle.alert)
-                    alertController.addAction(UIAlertAction(title: "Dismiss", style: UIAlertActionStyle.default,handler: nil))
-                    self.present(alertController, animated: true, completion: nil)
-                    
-                    
-                }
-                
-            }
-        }
-    }
     
     
     func updateGraph(){
