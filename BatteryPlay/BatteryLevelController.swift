@@ -241,6 +241,7 @@ class BatteryLevelController: UIViewController, CBCentralManagerDelegate, CBPeri
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        var timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(self.update), userInfo: nil, repeats: true)
         centralManager = CBCentralManager(delegate: self, queue: nil)
         //******Graph Background Color******//
         chtChart.backgroundColor = colorWithHexString(hexString: "#FAF7F3")
@@ -257,6 +258,7 @@ class BatteryLevelController: UIViewController, CBCentralManagerDelegate, CBPeri
             setupPortraitLayout()
         }
     }
+
     
     // when device is rotated, setup proper view layout
     @objc func deviceRotated() {
@@ -344,6 +346,17 @@ class BatteryLevelController: UIViewController, CBCentralManagerDelegate, CBPeri
         
     }
     
+    @objc func update() {
+    
+    let number = arc4random_uniform(101) // [0, 100]
+    
+    totalValues += 1
+    self.times.append(totalValues)
+    self.sensorValues.append(Double(number))
+    updateGraph()
+
+    }
+    
     func updateGraph(){
         
         portraitDisplayView.label.text = "\(sensorValues[sensorValues.count - 1])"
@@ -362,11 +375,14 @@ class BatteryLevelController: UIViewController, CBCentralManagerDelegate, CBPeri
         let chartData = LineChartData()
         chartData.addDataSet(chartDataSet)
         chartData.setDrawValues(false)
-        chartDataSet.colors = [colorWithHexString(hexString: "#03C03C")]
-        chartDataSet.setCircleColor(colorWithHexString(hexString: "#03C03C"))
-        chartDataSet.circleHoleColor = colorWithHexString(hexString: "#03C03C")
+        chartDataSet.colors = [colorWithHexString(hexString: "#e8802f")]
+        chartDataSet.setCircleColor(colorWithHexString(hexString: "#e8802f"))
+        chartDataSet.circleHoleColor = colorWithHexString(hexString: "#e8802f")
+        //#03C03C
         chartDataSet.circleHoleRadius = 0.15
-        chartDataSet.lineWidth = 1.5
+        chartDataSet.drawCirclesEnabled = false
+        chartDataSet.lineWidth = 2.5
+        chartDataSet.mode = .cubicBezier
         
         
         chtChart.xAxis.labelPosition = .bottom
