@@ -136,8 +136,8 @@
 			children = (
 				ABAF34202013D97C00663D54 /* AppDelegate.swift */,
 				ABAF34222013D97C00663D54 /* BatteryLevelController.swift */,
-				ABE9CFEF201FBF9100033973 /* EnergyController.swift */,
 				AB7BEA0A2024DE1C00BC27FA /* DisplayView.swift */,
+				ABE9CFEF201FBF9100033973 /* EnergyController.swift */,
 				AB0A9063202CFA72001EE20E /* datacell2.swift */,
 				AB0A905B202CBFAE001EE20E /* dataChartController.swift */,
 				AB0A905D202CC9C3001EE20E /* dataCell.swift */,

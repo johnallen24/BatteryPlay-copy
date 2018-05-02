@@ -13,63 +13,67 @@ class DisplayView: UIView {
     
     var scale1: CGFloat = 0.6
     var scale2 : CGFloat = 0.48
-
+    
     var label: UILabel = UILabel()
     
     override func draw(_ rect: CGRect) {
+       
+         setGradientBackground(colorOne: colorWithHexString(hexString: "#22ceed"), colorTwo: colorWithHexString(hexString: "#34f5c4"))
+        //colorWithHexString(hexString: "#34f5c4").setFill()
+        //UIRectFill(rect)
         
-       colorWithHexString(hexString: "E0E0E0").setFill()
-        UIRectFill(rect)
+        //34f5c4
+        let centerpoint = CGPoint(x: bounds.midX, y: bounds.midY + 50)
         
-        
-            let centerpoint = CGPoint(x: bounds.midX, y: bounds.midY + 50)
-            
-            
-            let outerCircleRadius = min(bounds.size.width, bounds.size.height) / 2.0 * scale1;
-            let outerCircleCenter = centerpoint
-            let path = UIBezierPath(arcCenter: outerCircleCenter, radius: outerCircleRadius, startAngle: 0, endAngle: 2 * CGFloat.pi, clockwise: false)
-            path.lineWidth = 5
-            colorWithHexString(hexString: "#03C03C").set()
-            path.fill()
-            path.stroke()
-            
-            
-            let innerCircleRadius = min(bounds.size.width, bounds.size.height) / 2.0 * scale2;
-            let innerCircleCenter = centerpoint
-            let path2 = UIBezierPath(arcCenter: innerCircleCenter, radius: innerCircleRadius, startAngle: 0, endAngle: 2 * CGFloat.pi, clockwise: false)
-            path2.lineWidth = 5
-            colorWithHexString(hexString: "#03C03C").set()
-            path2.fill()
-            path2.stroke()
-            
-            let rectSize = CGSize(width: 160, height: 120)
-            let rectOrigin = CGPoint(x: (centerpoint.x - rectSize.width / 2 ), y: (centerpoint.y - rectSize.height / 2))
-            let rectangle = CGRect(origin: rectOrigin, size: rectSize)
-            label.frame = frame(forAlignmentRect: rectangle)
-            
-            label.backgroundColor = colorWithHexString(hexString: "#03C03C")
-            // label.center = CGPointMake(160, 284)
-            label.textAlignment = .center
-            label.baselineAdjustment = .alignCenters
-            label.text = "0"
-            label.font = UIFont.boldSystemFont(ofSize: 80)
-            label.adjustsFontSizeToFitWidth = true
-            label.textColor = UIColor.white
-            self.addSubview(label)
-            
-            let rect2Size = CGSize(width: 200, height: 50)
-            let rect2Origin = CGPoint(x: centerpoint.x - rect2Size.width/2 , y: (centerpoint.y - (outerCircleRadius + 60)))
-            let rectangle2 = CGRect(origin: rect2Origin, size: rect2Size)
-            var topLabel = UILabel(frame: rectangle2)
-            
-            topLabel.textAlignment = .center
-            topLabel.backgroundColor = colorWithHexString(hexString: "#E0E0E0")
-            topLabel.font = UIFont.boldSystemFont(ofSize: 40.0)
-            topLabel.text = "Voltage"
-            self.addSubview(topLabel)
+        let outerCircleRadius = min(bounds.size.width, bounds.size.height) / 2.0 * scale1;
+        let outerCircleCenter = centerpoint
+        let path = UIBezierPath(arcCenter: outerCircleCenter, radius: outerCircleRadius, startAngle: 0, endAngle: 2 * CGFloat.pi, clockwise: false)
+        path.lineWidth = 5
+        colorWithHexString(hexString: "#D85426").set()
+        path.fill()
+        path.stroke()
         
         
-    
+        let innerCircleRadius = min(bounds.size.width, bounds.size.height) / 2.0 * scale2;
+        let innerCircleCenter = centerpoint
+        let path2 = UIBezierPath(arcCenter: innerCircleCenter, radius: innerCircleRadius, startAngle: 0, endAngle: 2 * CGFloat.pi, clockwise: false)
+        path2.lineWidth = 5
+        colorWithHexString(hexString: "#D85426").set()
+        path2.fill()
+        path2.stroke()
+        
+        
+        let rectSize = CGSize(width: 160, height: 120)
+        let rectOrigin = CGPoint(x: (centerpoint.x - rectSize.width / 2 ), y: (centerpoint.y - rectSize.height / 2))
+        let rectangle = CGRect(origin: rectOrigin, size: rectSize)
+        label.frame = frame(forAlignmentRect: rectangle)
+        
+        label.backgroundColor = colorWithHexString(hexString: "#D85426")
+        // label.center = CGPointMake(160, 284)
+        label.textAlignment = .center
+        label.baselineAdjustment = .alignCenters
+        label.text = "0"
+        label.font = UIFont.boldSystemFont(ofSize: 80)
+        label.adjustsFontSizeToFitWidth = true
+        label.textColor = UIColor.white
+        self.addSubview(label)
+        
+      
+        
+        let rect2Size = CGSize(width: 200, height: 50)
+        let rect2Origin = CGPoint(x: centerpoint.x - rect2Size.width/2 , y: (centerpoint.y - (outerCircleRadius + 60)))
+        let rectangle2 = CGRect(origin: rect2Origin, size: rect2Size)
+        var topLabel = UILabel(frame: rectangle2)
+        
+        topLabel.textAlignment = .center
+        topLabel.backgroundColor = UIColor.clear
+        topLabel.font = UIFont.boldSystemFont(ofSize: 40.0)
+        topLabel.text = "Voltage"
+        self.addSubview(topLabel)
+        
+        
+        
+        
     }
     
     func colorWithHexString(hexString: String, alpha:CGFloat? = 1.0) -> UIColor {
@@ -96,5 +100,5 @@ class DisplayView: UIView {
         scanner.scanHexInt32(&hexInt)
         return hexInt
     }
-
+    
 }
